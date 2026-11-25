@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.sabotage-audit-tmp/
+scan.json
+scan.md
+scan-triage.md
+SABOTAGE_AUDIT_REPORT.md
+.DS_Store
+Thumbs.db
