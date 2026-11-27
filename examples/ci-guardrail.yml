@@ -1,0 +1,37 @@
+name: Sabotage Audit Guardrail
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  forensic-prescan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch forensic_scan.py
+        run: |
+          mkdir -p .sabotage-audit-tmp
+          curl -fsSL https://raw.githubusercontent.com/Adolanium/sabotage-audit/main/scripts/forensic_scan.py \
+            -o .sabotage-audit-tmp/forensic_scan.py
+
+      - name: Scan PR diff and codebase for HIGH leads
+        run: |
+          python .sabotage-audit-tmp/forensic_scan.py . \
+            --since "origin/${{ github.base_ref }}" \
+            --md-out .sabotage-audit-tmp/scan.md \
+            --fail-on-high
+
+      - name: Upload triage report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabotage-audit-triage
+          path: .sabotage-audit-tmp/scan.md
